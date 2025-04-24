@@ -1,11 +1,12 @@
+import { Armazenador } from "./Armazenador.js";
 import { GrupoTransacao } from "./GrupoTransacao.js";
 import { TipoTransacao } from "./TipoTransacao.js";
 import { Transacao } from "./Transacao.js";
 
 export class Conta {
-    nome: string
-    saldo: number = JSON.parse(localStorage.getItem("saldo")) || 0;
-    transacoes: Transacao[] = JSON.parse(localStorage.getItem("trasacao"), (key: string, value: any) => {
+    protected nome: string
+    protected saldo: number = Armazenador.obter<number>("saldo") || 0;
+    protected transacoes: Transacao[] = Armazenador.obter<Transacao[]>(("trasacoes"), (key: string, value: any) => {
         if (key === "data") {
             return new Date(value);
         }
@@ -15,6 +16,11 @@ export class Conta {
     constructor(nome: string) {
         this.nome;
     }
+    
+    public getTitular(){
+            return this.nome;    
+    }
+
     getGruposTransacoes(): GrupoTransacao[] {
         const gruposTransacoes: GrupoTransacao[] = [];
         const listaTransacoes: Transacao[] = structuredClone(this.transacoes);
@@ -52,7 +58,7 @@ export class Conta {
         }
 
         this.saldo -= valor;
-        localStorage.setItem("saldo", this.saldo.toString());
+        Armazenador.salvar("saldo", this.saldo.toString());
     }
 
     depositar(valor: number): void {
@@ -61,7 +67,7 @@ export class Conta {
         }
 
         this.saldo += valor;
-        localStorage.setItem("saldo", this.saldo.toString());
+        Armazenador.salvar("saldo", this.saldo.toString());
     }
 
     registrarTransacao(novaTransacao: Transacao): void {
@@ -81,5 +87,6 @@ export class Conta {
         localStorage.setItem("transacoes", JSON.stringify(this.transacoes));
     }
 }
-const conta = new Conta("Joana da Silva Oliveita")
+const conta = new Conta("Joana da Silva Oliveita");
+console.log("oooi");
 export default conta;
