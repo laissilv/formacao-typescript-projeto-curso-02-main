@@ -1,4 +1,5 @@
 import { Armazenador } from "./Armazenador.js";
+import { ValidaDebito, VAlidaDeposito } from "./Decorators.js";
 import { GrupoTransacao } from "./GrupoTransacao.js";
 import { TipoTransacao } from "./TipoTransacao.js";
 import { Transacao } from "./Transacao.js";
@@ -16,9 +17,9 @@ export class Conta {
     constructor(nome: string) {
         this.nome;
     }
-    
-    public getTitular(){
-            return this.nome;    
+
+    public getTitular() {
+        return this.nome;
     }
 
     getGruposTransacoes(): GrupoTransacao[] {
@@ -41,6 +42,7 @@ export class Conta {
 
         return gruposTransacoes;
     }
+
     getSaldo() {
         return this.saldo;
     }
@@ -48,24 +50,13 @@ export class Conta {
     getDataAcesso(): Date {
         return new Date();
     }
-
+@ValidaDebito
     debitar(valor: number): void {
-        if (valor <= 0) {
-            throw new Error("O valor a ser debitado deve ser maior que zero!");
-        }
-        if (valor > this.saldo) {
-            throw new Error("Saldo insuficiente!");
-        }
-
         this.saldo -= valor;
         Armazenador.salvar("saldo", this.saldo.toString());
     }
-
+@VAlidaDeposito
     depositar(valor: number): void {
-        if (valor <= 0) {
-            throw new Error("O valor a ser depositado deve ser maior que zero!");
-        }
-
         this.saldo += valor;
         Armazenador.salvar("saldo", this.saldo.toString());
     }
@@ -87,6 +78,20 @@ export class Conta {
         localStorage.setItem("transacoes", JSON.stringify(this.transacoes));
     }
 }
+//exemplom de herança no metodo a baixo COntaPremiun herda as info de Conta
+export class ContaPremium extends Conta {
+    //verifica o tipo e devolve um bonus ao cliente e salva no localStorange
+    registrarTransacao(transacao: Transacao): void {
+        if (transacao.tipoTransacao === TipoTransacao.DEPOSITO) {
+            console.log("ganhou um bonus de 0.50 centavos");
+            transacao.valor += 0.5
+        }
+        super.registrarTransacao(transacao)//metodo do registrar transação 
+    }
+}
+
 const conta = new Conta("Joana da Silva Oliveita");
+const contaPremium = new ContaPremium("Lais Santos da Silva");
 console.log("oooi");
 export default conta;
+//export default contaPremium;
